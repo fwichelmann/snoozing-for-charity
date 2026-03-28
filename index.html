@@ -5,207 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Snooze for Charity</title>
     
-    <!-- App-Optimierungen für das Handy -->
+    <link rel="apple-touch-icon" href="assets/icon.png">
+    <link rel="icon" type="image/png" href="assets/icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Snooze4Charity">
-    <link rel="apple-touch-icon" href="assets/icon.png">
-    <link rel="icon" type="image/png" href="assets/icon.png">
+
+    <script src="https://cdn.jsdelivr.net"></script>
 
     <style>
         :root { 
             --orange: #ff9800; 
             --red: #ff3b30; 
-            --bg: #000; 
+            --bg-dark: #02040a; 
+            --bg-light: #0f172a;
             --green: #4caf50; 
-            --card: #1c1c1e; 
+            --card: rgba(255, 255, 255, 0.05); 
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background-color: var(--bg); 
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-light) 100%);
             color: #fff; 
             font-family: -apple-system, system-ui, sans-serif; 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 40px 20px;
-            transition: background 0.5s; 
-            overflow: hidden;
+            margin: 0; height: 100vh; display: flex; 
+            flex-direction: column; align-items: center; 
+            justify-content: space-between; padding: 40px 20px;
+            transition: background 1s ease; overflow: hidden;
+            position: relative;
         }
 
-        .header { 
-            text-align: center; 
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
+        /* Sterne-Hintergrund */
+        #stars-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
         }
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        /* Mond */
+        .moon {
+            position: absolute; top: 50px; right: 40px; width: 60px; height: 60px;
+            background: #fefcd7; border-radius: 50%;
+            box-shadow: 0 0 20px rgba(254, 252, 215, 0.5);
+            z-index: 0; opacity: 0.8;
+        }
+
+        .header, #live-clock, .alarm-box, .controls-container { position: relative; z-index: 1; }
+
+        .header { text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .logo { height: 70px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
         
-        .logo { height: 75px; margin-bottom: 15px; }
-        
-        /* Guthaben-Anzeige */
         .balance-card { 
-            background: var(--card); 
-            padding: 12px 25px; 
-            border-radius: 20px; 
-            border: 1px solid #333; 
+            background: var(--card); backdrop-filter: blur(10px);
+            padding: 12px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); 
         }
-        .balance-label { 
-            font-size: 0.7rem; 
-            color: #888; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            display: block; 
-            margin-bottom: 2px; 
-        }
+        .balance-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px; }
         #balance { font-size: 1.8rem; font-weight: 800; color: #fff; }
 
-        /* Live Uhrzeit Berlin */
-        #live-clock { 
-            font-size: 5.5rem; 
-            font-weight: 100; 
-            letter-spacing: -3px; 
-            margin: 10px 0; 
-            font-variant-numeric: tabular-nums; 
-        }
+        #live-clock { font-size: 5.5rem; font-weight: 100; letter-spacing: -3px; margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* Wecker-Einstellung Box */
-        .alarm-box {
-            background: #111; 
-            padding: 20px; 
-            border-radius: 25px; 
-            border: 1px solid #222; 
-            width: 100%; 
-            max-width: 320px; 
-            text-align: center;
+        .alarm-box { 
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px);
+            padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); 
+            width: 100%; max-width: 320px; text-align: center; 
         }
-        
-        .section-label {
-            font-size: 0.75rem;
-            color: #888;
-            margin-bottom: 8px;
-            display: block;
-            text-transform: none;
-        }
+        .section-label { font-size: 0.75rem; color: #999; margin-bottom: 8px; display: block; }
+        .charity-picker { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; color: var(--green); padding: 10px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 20px; outline: none; appearance: none; text-align: center; }
+        .alarm-label { font-size: 0.7rem; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        #alarm-time { background: transparent; border: none; color: var(--orange); font-size: 2.8rem; font-family: inherit; text-align: center; outline: none; width: 100%; }
 
-        .charity-picker { 
-            width: 100%; 
-            background: #222; 
-            border: 1px solid #333; 
-            color: var(--green); 
-            padding: 10px; 
-            border-radius: 12px; 
-            font-size: 0.9rem; 
-            margin-bottom: 20px; 
-            outline: none;
-            appearance: none;
-            text-align: center;
-        }
+        .set-alarm-btn { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 14px; border-radius: 15px; margin-top: 15px; width: 100%; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
+        .set-alarm-btn.active { background: var(--green); color: #000; }
 
-        .alarm-label { 
-            font-size: 0.7rem; 
-            color: #666; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            margin-bottom: 5px; 
-        }
-        
-        #alarm-time { 
-            background: transparent; 
-            border: none; 
-            color: var(--orange); 
-            font-size: 2.8rem; 
-            font-family: inherit; 
-            text-align: center; 
-            outline: none; 
-            width: 100%;
-        }
-
-        .set-alarm-btn {
-            background: #333; 
-            color: #fff; 
-            border: none; 
-            padding: 14px; 
-            border-radius: 15px; 
-            margin-top: 15px; 
-            width: 100%; 
-            font-weight: bold; 
-            font-size: 0.9rem; 
-            cursor: pointer; 
-            transition: all 0.3s;
-        }
-        .set-alarm-btn.active { 
-            background: var(--green); 
-            color: #000; 
-        }
-
-        /* Snooze & Stop Bereich */
-        .controls-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
+        .controls-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; min-height: 250px; justify-content: center; }
         
         .snooze-btn { 
-            width: 180px; 
-            height: 180px; 
-            border-radius: 50%; 
-            background: var(--orange); 
-            border: none; 
-            color: #000; 
-            font-size: 1.6rem; 
-            font-weight: 900; 
-            cursor: pointer;
-            box-shadow: 0 10px 40px rgba(255,152,0,0.3);
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            transition: transform 0.1s;
+            width: 180px; height: 180px; border-radius: 50%; 
+            background: var(--orange); border: none; color: #000; 
+            font-size: 1.6rem; font-weight: 900; cursor: pointer; 
+            box-shadow: 0 10px 40px rgba(255,152,0,0.4); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; 
         }
         .snooze-btn:active { transform: scale(0.94); }
         .snooze-btn small { font-size: 0.8rem; margin-top: 5px; opacity: 0.8; }
+        
+        .stop-alarm-btn { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 15px 40px; border-radius: 30px; margin-top: 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0; pointer-events: none; }
+        
+        body.alarm-active .stop-alarm-btn, body.has-snoozed .stop-alarm-btn { opacity: 1; pointer-events: auto; border-color: #fff; background: rgba(255,255,255,0.2); }
 
-        .stop-alarm-btn {
-            background: transparent; 
-            color: #555; 
-            border: 1px solid #333; 
-            padding: 12px 25px; 
-            border-radius: 30px; 
-            margin-top: 25px; 
-            font-size: 0.85rem; 
-            cursor: pointer; 
-            transition: all 0.3s;
-            opacity: 0; 
-            pointer-events: none;
-        }
-        
-        body.alarm-active .stop-alarm-btn, 
-        body.has-snoozed .stop-alarm-btn { 
-            opacity: 1; 
-            pointer-events: auto; 
-            color: #fff; 
-            border-color: #fff; 
-        }
-        
-        body.alarm-active { 
-            background-color: var(--red); 
-            animation: flash 1s infinite; 
-        }
-        
-        @keyframes flash { 
-            0%, 100% { background: #600; } 
-            50% { background: #b00; } 
-        }
+        /* Alarm-Modus Hintergrund */
+        body.alarm-active { background: linear-gradient(180deg, #600 0%, #b00 100%); animation: flash 1s infinite; }
+        @keyframes flash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
     </style>
 </head>
 <body>
+
+    <div id="stars-container"></div>
+    <div class="moon"></div>
 
     <div class="header">
         <img src="assets/logo.png" class="logo" alt="Logo">
@@ -215,7 +116,6 @@
         </div>
     </div>
 
-    <!-- Live Uhrzeit Berlin -->
     <div id="live-clock">00:00</div>
 
     <div class="alarm-box">
@@ -226,10 +126,8 @@
             <option>Tierheim Berlin 🐾</option>
             <option>Kinderhilfe e.V. 🧸</option>
         </select>
-        
         <div class="alarm-label">Weckzeit</div>
         <input type="time" id="alarm-time" value="08:00">
-        
         <button id="set-btn" class="set-alarm-btn" onclick="setAlarm()">WECKER STELLEN</button>
     </div>
 
@@ -238,20 +136,27 @@
         <button id="stop-btn" class="stop-alarm-btn" onclick="stopAlarm()">ICH BIN WACH</button>
     </div>
 
-    <!-- Alarm Sound -->
     <audio id="alarm-sound" loop preload="auto">
         <source src="assets/alarm.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        let guthaben = localStorage.getItem('snooze_balance');
-        if (guthaben === null) {
-            guthaben = 10.00;
-            localStorage.setItem('snooze_balance', guthaben);
-        } else {
-            guthaben = parseFloat(guthaben);
+        // Sterne generieren
+        const container = document.getElementById('stars-container');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 3 + 'px';
+            star.style.width = size;
+            star.style.height = size;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            container.appendChild(star);
         }
 
+        let storedBalance = localStorage.getItem('snooze_balance');
+        let guthaben = (storedBalance === null) ? 10.00 : parseFloat(storedBalance);
         let isAlarming = false;
         let alarmSet = false;
         let lastSnoozeMinute = -1;
@@ -262,7 +167,12 @@
         const sound = document.getElementById('alarm-sound');
         const setBtn = document.getElementById('set-btn');
 
-        balanceDisplay.innerText = guthaben.toFixed(2) + " €";
+        function updateUI() {
+            balanceDisplay.innerText = guthaben.toFixed(2) + " €";
+            balanceDisplay.style.color = (guthaben < 1.00) ? "#ff3b30" : "#fff";
+        }
+        
+        updateUI();
         alarmInput.value = localStorage.getItem('alarm_time') || "08:00";
         charitySelect.value = localStorage.getItem('selected_charity') || "Ocean Cleanup 🌊";
 
@@ -274,7 +184,6 @@
         function updateClock() {
             const now = new Date();
             document.getElementById('live-clock').innerText = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-            
             if (alarmSet && !isAlarming) {
                 const currentHM = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
                 if (currentHM === alarmInput.value && now.getMinutes() !== lastSnoozeMinute) {
@@ -290,49 +199,40 @@
             saveSettings();
             setBtn.innerText = "WECKER IST GESTELLT ✅";
             setBtn.classList.add('active');
-            
-            sound.play().then(() => {
-                sound.pause();
-                sound.currentTime = 0;
-            }).catch(e => console.log("Audio Init"));
+            sound.play().then(() => { sound.pause(); sound.currentTime = 0; }).catch(() => {});
         }
 
         function triggerAlarm() {
             isAlarming = true;
             document.body.classList.add('alarm-active');
             document.body.classList.remove('has-snoozed');
-            sound.play().catch(e => {
-                alert("Bitte Wecker erneut stellen (Browser blockiert Sound)");
-            });
+            sound.play().catch(() => {});
         }
 
         function snooze() {
             if (isAlarming) {
-                guthaben -= 0.05;
-                balanceDisplay.innerText = guthaben.toFixed(2) + " €";
-                localStorage.setItem('snooze_balance', guthaben);
-
+                guthaben = Math.max(0, guthaben - 0.05);
+                localStorage.setItem('snooze_balance', guthaben.toString());
+                updateUI();
                 lastSnoozeMinute = new Date().getMinutes();
                 isAlarming = false;
                 document.body.classList.remove('alarm-active');
                 document.body.classList.add('has-snoozed');
                 sound.pause();
                 sound.currentTime = 0;
-
                 let [h, m] = alarmInput.value.split(':').map(Number);
                 m += 5;
                 if (m >= 60) { m -= 60; h = (h + 1) % 24; }
                 alarmInput.value = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
-                
                 setAlarm();
             }
         }
 
         function stopAlarm() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff9800', '#ffffff', '#4caf50'] });
             isAlarming = false;
             alarmSet = false;
-            document.body.classList.remove('alarm-active');
-            document.body.classList.remove('has-snoozed');
+            document.body.classList.remove('alarm-active', 'has-snoozed');
             sound.pause();
             sound.currentTime = 0;
             setBtn.innerText = "WECKER STELLEN";
