@@ -6,31 +6,33 @@
     <title>Snoozing for Charity</title>
     <style>
         :root { --orange: #ff9800; --red: #b71c1c; --grey: #888; }
-        body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; text-align: center; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.3s; overflow: hidden; }
+        body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; text-align: center; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.5s; overflow: hidden; }
         
-        .logo { max-height: 140px; margin-bottom: 20px; transition: transform 0.5s; }
-        .stats { color: var(--grey); font-size: 1.4rem; margin-bottom: 5px; font-weight: 300; }
-        .charity-info { color: #4caf50; font-size: 0.9rem; margin-bottom: 40px; }
+        .logo { max-height: 140px; margin-bottom: 10px; transition: all 0.5s ease-in-out; }
         
-        /* Zeiteingabe Styling */
-        .time-container { margin: 20px 0; }
-        #alarm-time { background: transparent; border: none; color: var(--orange); font-size: 5rem; font-family: inherit; font-weight: 100; text-align: center; outline: none; cursor: pointer; }
+        .stats { color: var(--grey); font-size: 1.6rem; margin-bottom: 5px; font-weight: 300; }
+        
+        /* Charity Dropdown */
+        .charity-picker { background: #222; border: 1px solid #444; color: #4caf50; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 30px; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; }
+        
+        .time-container { margin: 10px 0; }
+        #alarm-time { background: transparent; border: none; color: var(--orange); font-size: 5.5rem; font-family: inherit; font-weight: 100; text-align: center; outline: none; cursor: pointer; -webkit-appearance: none; }
         .label { color: #444; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
 
         /* Snooze Button */
-        .snooze-btn { width: 220px; height: 220px; border-radius: 50%; background-color: var(--orange); border: none; color: #000; font-size: 1.8rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 30px; }
+        .snooze-btn { width: 230px; height: 230px; border-radius: 50%; background-color: var(--orange); border: none; color: #000; font-size: 1.8rem; font-weight: bold; cursor: pointer; transition: transform 0.1s, box-shadow 0.3s; box-shadow: 0 10px 40px rgba(255,152,0,0.2); margin-top: 20px; }
         .snooze-btn:active { transform: scale(0.92); }
         .snooze-btn small { display: block; font-size: 0.9rem; margin-top: 5px; opacity: 0.7; }
 
         /* Alarm-Effekte */
         body.alarm-active { background-color: var(--red); animation: flash 1s infinite; }
-        body.alarm-active .logo { transform: scale(1.3); }
-        body.alarm-active .snooze-btn { box-shadow: 0 0 50px #fff; animation: shake 0.5s infinite; }
+        body.alarm-active .logo { transform: scale(1.3) rotate(5deg); }
+        body.alarm-active .snooze-btn { box-shadow: 0 0 60px #fff; animation: shake 0.4s infinite; background-color: #fff; }
         
         @keyframes flash { 0%, 100% { background-color: #600; } 50% { background-color: #b00; } }
-        @keyframes shake { 0% { transform: rotate(0); } 25% { transform: rotate(3deg); } 75% { transform: rotate(-3deg); } 100% { transform: rotate(0); } }
+        @keyframes shake { 0% { transform: scale(1.1) rotate(0); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } 100% { transform: scale(1.1) rotate(0); } }
         
-        #test-link { margin-top: 50px; color: #333; text-decoration: none; font-size: 0.8rem; cursor: pointer; }
+        #test-link { margin-top: 40px; color: #333; text-decoration: none; font-size: 0.8rem; cursor: pointer; border: 1px solid #222; padding: 5px 15px; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -38,39 +40,52 @@
     <img src="assets/logo.png" class="logo" alt="Logo">
     
     <div class="stats">Guthaben: <span id="balance">10.00</span> €</div>
-    <div class="charity-info">Spende an: <span id="charity">Ocean Cleanup 🌊</span></div>
+    
+    <!-- Charity Auswahl -->
+    <select id="charity-select" class="charity-picker" onchange="saveCharity()">
+        <option value="Ocean Cleanup 🌊">Ocean Cleanup 🌊</option>
+        <option value="Trees for Future 🌳">Trees for Future 🌳</option>
+        <option value="Tierheim Berlin 🐾">Tierheim Berlin 🐾</option>
+        <option value="Kinderhilfe e.V. 🧸">Kinderhilfe e.V. 🧸</option>
+    </select>
 
     <div class="time-container">
-        <div class="label">Weckzeit</div>
+        <div class="label">Weckzeit einstellen</div>
         <input type="time" id="alarm-time" value="08:00">
     </div>
 
     <button class="snooze-btn" onclick="snooze()">SNOOZE<small>-0,05 €</small></button>
 
-    <div id="test-link" onclick="testAlarm()">🔔 Alarm testen (in 5 Sek.)</div>
+    <div id="test-link" onclick="testAlarm()">🔔 TEST-ALARM (In 5 Sek.)</div>
 
-    <!-- Audio Element -->
     <audio id="alarm-sound" loop preload="auto">
         <source src="assets/alarm.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        let guthaben = parseFloat(localStorage.getItem('charity_balance')) || 10.00;
+        let guthaben = parseFloat(localStorage.getItem('snooze_balance')) || 10.00;
         let isAlarming = false;
+        
         const sound = document.getElementById('alarm-sound');
         const balanceDisplay = document.getElementById('balance');
         const alarmInput = document.getElementById('alarm-time');
+        const charitySelect = document.getElementById('charity-select');
 
-        // Stand beim Laden anzeigen
+        // Initialisierung: Geladene Werte anzeigen
         balanceDisplay.innerText = guthaben.toFixed(2);
+        charitySelect.value = localStorage.getItem('selected_charity') || "Ocean Cleanup 🌊";
 
-        // Jede Sekunde prüfen
+        function saveCharity() {
+            localStorage.setItem('selected_charity', charitySelect.value);
+        }
+
+        // Wecker-Logik jede Sekunde
         setInterval(() => {
             if (isAlarming) return;
             const now = new Date();
-            const nowString = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            const nowTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
             
-            if (nowString === alarmInput.value && now.getSeconds() === 0) {
+            if (nowTime === alarmInput.value && now.getSeconds() === 0) {
                 triggerAlarm();
             }
         }, 1000);
@@ -78,7 +93,9 @@
         function triggerAlarm() {
             isAlarming = true;
             document.body.classList.add('alarm-active');
-            sound.play().catch(() => console.log("Sound blockiert. Klick nötig!"));
+            sound.play().catch(() => {
+                console.log("Browser blockiert Sound. Bitte einmal klicken!");
+            });
         }
 
         function snooze() {
@@ -86,7 +103,7 @@
                 // Geld abziehen
                 guthaben -= 0.05;
                 balanceDisplay.innerText = guthaben.toFixed(2);
-                localStorage.setItem('charity_balance', guthaben);
+                localStorage.setItem('snooze_balance', guthaben);
 
                 // Alarm stoppen
                 isAlarming = false;
@@ -100,12 +117,13 @@
                 if (m >= 60) { m -= 60; h = (h + 1) % 24; }
                 alarmInput.value = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
             } else {
-                alert("Der Wecker klingelt gerade nicht.");
+                // Optional: Kleiner Effekt wenn man snoozed ohne Alarm
+                document.querySelector('.snooze-btn').style.transform = "scale(0.95)";
+                setTimeout(() => document.querySelector('.snooze-btn').style.transform = "scale(1)", 100);
             }
         }
 
         function testAlarm() {
-            console.log("Test startet...");
             setTimeout(triggerAlarm, 5000);
         }
     </script>
