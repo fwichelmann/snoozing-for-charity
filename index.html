@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Snooze for Charity</title>
     
+    <!-- iPhone Home-Bildschirm Optimierung -->
     <link rel="apple-touch-icon" href="assets/icon.png">
     <link rel="icon" type="image/png" href="assets/icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Snooze4Charity">
 
+    <!-- Konfetti Bibliothek -->
     <script src="https://cdn.jsdelivr.net"></script>
 
     <style>
@@ -45,7 +47,10 @@
             position: absolute; background: white; border-radius: 50%;
             opacity: 0.5; animation: twinkle var(--duration) infinite ease-in-out;
         }
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes twinkle { 
+            0%, 100% { opacity: 0.3; transform: scale(1); } 
+            50% { opacity: 1; transform: scale(1.2); } 
+        }
 
         /* Mond */
         .moon {
@@ -72,10 +77,16 @@
         .alarm-box { 
             background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px);
             padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); 
-            width: 100%; max-width: 320px; text-align: center; 
+            width: 100%; max-width: 340px; text-align: center; 
         }
         .section-label { font-size: 0.75rem; color: #999; margin-bottom: 8px; display: block; }
-        .charity-picker { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; color: var(--green); padding: 10px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 20px; outline: none; appearance: none; text-align: center; }
+        
+        .charity-picker { 
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; color: var(--green); 
+            padding: 12px; border-radius: 12px; font-size: 0.95rem; margin-bottom: 20px; outline: none; 
+            appearance: none; text-align: center; cursor: pointer;
+        }
+
         .alarm-label { font-size: 0.7rem; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         #alarm-time { background: transparent; border: none; color: var(--orange); font-size: 2.8rem; font-family: inherit; text-align: center; outline: none; width: 100%; }
 
@@ -98,7 +109,6 @@
         
         body.alarm-active .stop-alarm-btn, body.has-snoozed .stop-alarm-btn { opacity: 1; pointer-events: auto; border-color: #fff; background: rgba(255,255,255,0.2); }
 
-        /* Alarm-Modus Hintergrund */
         body.alarm-active { background: linear-gradient(180deg, #600 0%, #b00 100%); animation: flash 1s infinite; }
         @keyframes flash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
     </style>
@@ -121,6 +131,9 @@
     <div class="alarm-box">
         <span class="section-label">Wähle eine Charity Organisation aus</span>
         <select id="charity-select" class="charity-picker" onchange="saveSettings()">
+            <option>FC Gütersloh e.V. ⚽</option>
+            <option>Frankreichaustausch 🇫🇷</option>
+            <option>Nachbarschaftshilfe Friedenau 🤝</option>
             <option>Ocean Cleanup 🌊</option>
             <option>Trees for Future 🌳</option>
             <option>Tierheim Berlin 🐾</option>
@@ -147,8 +160,7 @@
             const star = document.createElement('div');
             star.className = 'star';
             const size = Math.random() * 3 + 'px';
-            star.style.width = size;
-            star.style.height = size;
+            star.style.width = size; star.style.height = size;
             star.style.left = Math.random() * 100 + '%';
             star.style.top = Math.random() * 100 + '%';
             star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
@@ -174,7 +186,7 @@
         
         updateUI();
         alarmInput.value = localStorage.getItem('alarm_time') || "08:00";
-        charitySelect.value = localStorage.getItem('selected_charity') || "Ocean Cleanup 🌊";
+        charitySelect.value = localStorage.getItem('selected_charity') || "FC Gütersloh e.V. ⚽";
 
         function saveSettings() {
             localStorage.setItem('alarm_time', alarmInput.value);
@@ -218,8 +230,7 @@
                 isAlarming = false;
                 document.body.classList.remove('alarm-active');
                 document.body.classList.add('has-snoozed');
-                sound.pause();
-                sound.currentTime = 0;
+                sound.pause(); sound.currentTime = 0;
                 let [h, m] = alarmInput.value.split(':').map(Number);
                 m += 5;
                 if (m >= 60) { m -= 60; h = (h + 1) % 24; }
@@ -233,8 +244,7 @@
             isAlarming = false;
             alarmSet = false;
             document.body.classList.remove('alarm-active', 'has-snoozed');
-            sound.pause();
-            sound.currentTime = 0;
+            sound.pause(); sound.currentTime = 0;
             setBtn.innerText = "WECKER STELLEN";
             setBtn.classList.remove('active');
         }
