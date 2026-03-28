@@ -5,76 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snoozing for Charity</title>
     <style>
-        :root { --orange: #ff9800; --red: #b71c1c; }
-        body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.3s; }
+        :root { --orange: #ff9800; --red: #b71c1c; --grey: #888; }
+        body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; text-align: center; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: background 0.3s; overflow: hidden; }
         
-        .logo { max-height: 120px; margin-bottom: 10px; }
-        .stats { color: #888; font-size: 1.2rem; margin-bottom: 5px; }
-        .charity-info { color: #4caf50; font-size: 0.9rem; margin-bottom: 30px; }
+        .logo { max-height: 140px; margin-bottom: 20px; transition: transform 0.5s; }
+        .stats { color: var(--grey); font-size: 1.4rem; margin-bottom: 5px; font-weight: 300; }
+        .charity-info { color: #4caf50; font-size: 0.9rem; margin-bottom: 40px; }
         
-        #clock { font-size: 5rem; font-weight: 100; color: var(--orange); margin: 20px 0; cursor: pointer; }
-        .time-label { color: #555; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        #alarm-time-input { background: transparent; border: none; color: var(--orange); font-size: 5rem; font-family: inherit; font-weight: 100; text-align: center; width: 100%; outline: none; cursor: pointer; }
-        
-        .snooze-container { position: relative; width: 220px; height: 220px; margin-top: 40px; }
-        .snooze-btn { width: 100%; height: 100%; border-radius: 50%; background-color: var(--orange); border: none; color: #000; font-size: 1.6rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 0px rgba(255,152,0,0); transition: transform 0.1s, box-shadow 0.3s; z-index: 5; position: relative; }
-        .snooze-btn:active { transform: scale(0.95); }
+        /* Zeiteingabe Styling */
+        .time-container { margin: 20px 0; }
+        #alarm-time { background: transparent; border: none; color: var(--orange); font-size: 5rem; font-family: inherit; font-weight: 100; text-align: center; outline: none; cursor: pointer; }
+        .label { color: #444; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* Alarm-Modus */
+        /* Snooze Button */
+        .snooze-btn { width: 220px; height: 220px; border-radius: 50%; background-color: var(--orange); border: none; color: #000; font-size: 1.8rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 30px; }
+        .snooze-btn:active { transform: scale(0.92); }
+        .snooze-btn small { display: block; font-size: 0.9rem; margin-top: 5px; opacity: 0.7; }
+
+        /* Alarm-Effekte */
         body.alarm-active { background-color: var(--red); animation: flash 1s infinite; }
-        body.alarm-active .snooze-btn { box-shadow: 0 0 40px #fff; animation: pulse 0.5s infinite alternate; }
+        body.alarm-active .logo { transform: scale(1.3); }
+        body.alarm-active .snooze-btn { box-shadow: 0 0 50px #fff; animation: shake 0.5s infinite; }
         
-        @keyframes flash { 0% { background-color: #800; } 50% { background-color: #b71c1c; } 100% { background-color: #800; } }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes flash { 0%, 100% { background-color: #600; } 50% { background-color: #b00; } }
+        @keyframes shake { 0% { transform: rotate(0); } 25% { transform: rotate(3deg); } 75% { transform: rotate(-3deg); } 100% { transform: rotate(0); } }
         
-        #test-btn { margin-top: 40px; background: transparent; border: 1px solid #333; color: #555; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        #test-link { margin-top: 50px; color: #333; text-decoration: none; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <img src="assets/logo.png" class="logo" alt="Snoozing for Charity">
+    <img src="assets/logo.png" class="logo" alt="Logo">
     
     <div class="stats">Guthaben: <span id="balance">10.00</span> €</div>
-    <div class="charity-info">Spende an: <span id="charity-name">Ocean Cleanup 🌊</span></div>
+    <div class="charity-info">Spende an: <span id="charity">Ocean Cleanup 🌊</span></div>
 
-    <div class="time-label">Wecker gestellt auf</div>
-    <div id="clock">
-        <input type="time" id="alarm-time-input" value="08:00">
+    <div class="time-container">
+        <div class="label">Weckzeit</div>
+        <input type="time" id="alarm-time" value="08:00">
     </div>
 
-    <div class="snooze-container">
-        <button class="snooze-btn" onclick="snooze()">SNOOZE<br><small>-0,05 €</small></button>
-    </div>
+    <button class="snooze-btn" onclick="snooze()">SNOOZE<small>-0,05 €</small></button>
 
-    <button id="test-btn" onclick="testAlarm()">ALARM TESTEN (In 5 Sek)</button>
+    <div id="test-link" onclick="testAlarm()">🔔 Alarm testen (in 5 Sek.)</div>
 
-    <audio id="alarm-sound" loop>
+    <!-- Audio Element -->
+    <audio id="alarm-sound" loop preload="auto">
         <source src="assets/alarm.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        let guthaben = parseFloat(localStorage.getItem('guthaben')) || 10.00;
+        let guthaben = parseFloat(localStorage.getItem('charity_balance')) || 10.00;
         let isAlarming = false;
         const sound = document.getElementById('alarm-sound');
         const balanceDisplay = document.getElementById('balance');
-        const timeInput = document.getElementById('alarm-time-input');
+        const alarmInput = document.getElementById('alarm-time');
 
-        // Initialisierung
-        updateDisplay();
+        // Stand beim Laden anzeigen
+        balanceDisplay.innerText = guthaben.toFixed(2);
 
-        function updateDisplay() {
-            balanceDisplay.innerText = guthaben.toFixed(2);
-            localStorage.setItem('guthaben', guthaben);
-        }
-
-        // Wecker-Check jede Sekunde
+        // Jede Sekunde prüfen
         setInterval(() => {
             if (isAlarming) return;
             const now = new Date();
-            const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            const nowString = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
             
-            if (currentTime === timeInput.value && now.getSeconds() === 0) {
+            if (nowString === alarmInput.value && now.getSeconds() === 0) {
                 triggerAlarm();
             }
         }, 1000);
@@ -82,32 +78,34 @@
         function triggerAlarm() {
             isAlarming = true;
             document.body.classList.add('alarm-active');
-            sound.play().catch(e => console.log("Sound geblockt - Interaktion nötig"));
+            sound.play().catch(() => console.log("Sound blockiert. Klick nötig!"));
         }
 
         function snooze() {
-            if (guthaben >= 0.05) {
+            if (isAlarming) {
+                // Geld abziehen
                 guthaben -= 0.05;
-                updateDisplay();
-                
+                balanceDisplay.innerText = guthaben.toFixed(2);
+                localStorage.setItem('charity_balance', guthaben);
+
                 // Alarm stoppen
                 isAlarming = false;
                 document.body.classList.remove('alarm-active');
                 sound.pause();
                 sound.currentTime = 0;
 
-                // Zeit um 5 Minuten erhöhen
-                let [hours, minutes] = timeInput.value.split(':').map(Number);
-                minutes += 5;
-                if (minutes >= 60) { minutes -= 60; hours = (hours + 1) % 24; }
-                timeInput.value = hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
+                // Weckzeit um 5 Minuten erhöhen
+                let [h, m] = alarmInput.value.split(':').map(Number);
+                m += 5;
+                if (m >= 60) { m -= 60; h = (h + 1) % 24; }
+                alarmInput.value = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
             } else {
-                alert("Guthaben leer!");
+                alert("Der Wecker klingelt gerade nicht.");
             }
         }
 
         function testAlarm() {
-            alert("Alarm startet in 5 Sekunden. Bitte bleib auf der Seite!");
+            console.log("Test startet...");
             setTimeout(triggerAlarm, 5000);
         }
     </script>
