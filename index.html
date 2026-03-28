@@ -5,52 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Snooze for Charity</title>
     <style>
-        :root { --orange: #ff9800; --red: #ff3b30; --bg: #000; }
+        :root { --orange: #ff9800; --red: #ff3b30; --bg: #000; --green: #4caf50; --card: #1c1c1e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg); color: #fff; 
-            font-family: -apple-system, sans-serif; 
+            font-family: -apple-system, system-ui, sans-serif; 
             margin: 0; height: 100vh; display: flex; 
             flex-direction: column; align-items: center; 
-            justify-content: space-around; padding: 40px 20px;
+            justify-content: space-between; padding: 40px 20px;
             transition: background 0.5s; overflow: hidden;
         }
 
-        .header { text-align: center; }
-        .logo { height: 70px; margin-bottom: 10px; }
+        .header { text-align: center; width: 100%; }
+        .logo { height: 65px; margin-bottom: 10px; }
         
         /* Guthaben-Anzeige */
-        .balance-card { background: #1c1c1e; padding: 10px 25px; border-radius: 15px; }
-        .balance-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        #balance { font-size: 1.8rem; font-weight: bold; color: var(--orange); display: block; }
+        .balance-card { background: var(--card); padding: 12px 25px; border-radius: 20px; display: inline-block; border: 1px solid #333; }
+        .balance-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px; }
+        #balance { font-size: 1.8rem; font-weight: 800; color: #fff; }
 
-        /* Live Uhrzeit */
-        #live-clock { font-size: 5.5rem; font-weight: 100; letter-spacing: -2px; margin: 10px 0; }
+        /* Live Uhrzeit Berlin */
+        #live-clock { font-size: 5.5rem; font-weight: 100; letter-spacing: -3px; margin: 15px 0; font-variant-numeric: tabular-nums; }
 
-        /* Wecker-Einstellung */
-        .alarm-settings { opacity: 0.6; }
-        .alarm-label { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
-        #alarm-time { 
-            background: transparent; border: none; color: #fff; 
-            font-size: 1.8rem; font-family: inherit; text-align: center; outline: none;
+        /* Wecker-Einstellung Box */
+        .alarm-box {
+            background: #111; padding: 20px; border-radius: 25px; 
+            border: 1px solid #222; width: 100%; max-width: 320px; text-align: center;
         }
-
-        /* Snooze Button */
-        .snooze-btn { 
-            width: 200px; height: 200px; border-radius: 50%; 
-            background: var(--orange); border: none; color: #000; 
-            font-size: 1.5rem; font-weight: 900; cursor: pointer;
-            box-shadow: 0 10px 40px rgba(255,152,0,0.3);
-        }
-        .snooze-btn:active { transform: scale(0.92); }
-        .snooze-btn small { display: block; font-size: 0.8rem; opacity: 0.7; }
-
-        /* Alarm-Effekt */
-        body.alarm-active { background-color: var(--red); animation: flash 1s infinite; }
-        @keyframes flash { 0%, 100% { background: #600; } 50% { background: #f00; } }
         
-        .test-btn { font-size: 0.7rem; color: #333; text-decoration: none; border: 1px solid #222; padding: 5px 10px; border-radius: 10px; }
+        .charity-picker { 
+            width: 100%; background: #222; border: 1px solid #333; color: var(--green); 
+            padding: 10px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 15px; outline: none;
+        }
+
+        .alarm-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        
+        #alarm-time { 
+            background: transparent; border: none; color: var(--orange); 
+            font-size: 2.8rem; font-family: inherit; text-align: center; outline: none; width: 100%;
+        }
+
+        .set-alarm-btn {
+            background: #333; color: #fff; border: none; 
+            padding: 14px; border-radius: 15px; margin-top: 15px; 
+            width: 100%; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+        }
+        .set-alarm-btn.active { background: var(--green); color: #000; }
+
+        /* Snooze & Stop Bereich */
+        .controls-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        
+        .snooze-btn { 
+            width: 180px; height: 180px; border-radius: 50%; 
+            background: var(--orange); border: none; color: #000; 
+            font-size: 1.6rem; font-weight: 900; cursor: pointer;
+            box-shadow: 0 10px 40px rgba(255,152,0,0.3);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .snooze-btn:active { transform: scale(0.94); }
+        .snooze-btn small { font-size: 0.8rem; margin-top: 5px; opacity: 0.8; }
+
+        .stop-alarm-btn {
+            background: transparent; color: #555; border: 1px solid #333; 
+            padding: 12px 25px; border-radius: 30px; margin-top: 25px; 
+            font-size: 0.85rem; cursor: pointer; transition: all 0.3s;
+            opacity: 0; pointer-events: none;
+        }
+        
+        /* Zustände */
+        body.alarm-active .stop-alarm-btn, body.has-snoozed .stop-alarm-btn { opacity: 1; pointer-events: auto; color: #fff; border-color: #fff; }
+        body.alarm-active { background-color: var(--red); animation: flash 1s infinite; }
+        @keyframes flash { 0%, 100% { background: #600; } 50% { background: #b00; } }
     </style>
 </head>
 <body>
@@ -63,88 +89,113 @@
         </div>
     </div>
 
-    <!-- Live Uhrzeit Berlin -->
     <div id="live-clock">00:00</div>
 
-    <div class="alarm-settings">
-        <div class="alarm-label">Wecker gestellt auf:</div>
+    <div class="alarm-box">
+        <select id="charity-select" class="charity-picker" onchange="saveSettings()">
+            <option>Ocean Cleanup 🌊</option>
+            <option>Trees for Future 🌳</option>
+            <option>Tierheim Berlin 🐾</option>
+            <option>Kinderhilfe e.V. 🧸</option>
+        </select>
+        
+        <div class="alarm-label">Weckzeit</div>
         <input type="time" id="alarm-time" value="08:00">
+        
+        <button id="set-btn" class="set-alarm-btn" onclick="setAlarm()">WECKER SCHARF SCHALTEN</button>
     </div>
 
-    <button class="snooze-btn" onclick="snooze()">SNOOZE<small>- 0,05 €</small></button>
-
-    <div class="test-btn" onclick="testAlarm()">TEST-ALARM (5 SEK.)</div>
+    <div class="controls-container">
+        <button class="snooze-btn" onclick="snooze()">SNOOZE<small>- 0,05 €</small></button>
+        <button id="stop-btn" class="stop-alarm-btn" onclick="stopAlarm()">ICH BIN WACH</button>
+    </div>
 
     <audio id="alarm-sound" loop preload="auto">
         <source src="assets/alarm.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // Logik für das Guthaben (Startwert 10€ falls leer)
-        let guthaben = localStorage.getItem('snooze_balance');
-        if (guthaben === null) {
-            guthaben = 10.00;
-            localStorage.setItem('snooze_balance', guthaben);
-        } else {
-            guthaben = parseFloat(guthaben);
-        }
-
+        let guthaben = localStorage.getItem('snooze_balance') ? parseFloat(localStorage.getItem('snooze_balance')) : 10.00;
         let isAlarming = false;
+        let alarmSet = false;
         let lastSnoozeMinute = -1;
 
         const balanceDisplay = document.getElementById('balance');
         const alarmInput = document.getElementById('alarm-time');
+        const charitySelect = document.getElementById('charity-select');
         const sound = document.getElementById('alarm-sound');
+        const setBtn = document.getElementById('set-btn');
 
-        // Initialisierung
+        // Laden
         balanceDisplay.innerText = guthaben.toFixed(2) + " €";
         alarmInput.value = localStorage.getItem('alarm_time') || "08:00";
+        charitySelect.value = localStorage.getItem('selected_charity') || "Ocean Cleanup 🌊";
 
-        // 1. Echtzeit-Uhr (Berlin)
+        function saveSettings() {
+            localStorage.setItem('alarm_time', alarmInput.value);
+            localStorage.setItem('selected_charity', charitySelect.value);
+        }
+
         function updateClock() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('live-clock').innerText = timeStr;
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
             
-            // Wecker-Check
-            const currentHM = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-            if (currentHM === alarmInput.value && !isAlarming && now.getMinutes() !== lastSnoozeMinute) {
-                triggerAlarm();
+            if (alarmSet && !isAlarming) {
+                const currentHM = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+                if (currentHM === alarmInput.value && now.getMinutes() !== lastSnoozeMinute) {
+                    triggerAlarm();
+                }
             }
         }
         setInterval(updateClock, 1000);
         updateClock();
 
+        function setAlarm() {
+            alarmSet = true;
+            saveSettings();
+            setBtn.innerText = "AKTIV FÜR " + charitySelect.value.split(' ')[0]; // Zeigt Namen kurz an
+            setBtn.classList.add('active');
+            sound.play().then(() => { sound.pause(); sound.currentTime = 0; }).catch(() => {});
+        }
+
         function triggerAlarm() {
             isAlarming = true;
             document.body.classList.add('alarm-active');
-            sound.play().catch(() => console.log("Sound blockiert"));
+            document.body.classList.remove('has-snoozed');
+            sound.play().catch(() => {});
         }
 
         function snooze() {
             if (isAlarming) {
-                // Geld abziehen
                 guthaben -= 0.05;
                 balanceDisplay.innerText = guthaben.toFixed(2) + " €";
                 localStorage.setItem('snooze_balance', guthaben);
 
-                // Stop & Pause
                 lastSnoozeMinute = new Date().getMinutes();
                 isAlarming = false;
                 document.body.classList.remove('alarm-active');
+                document.body.classList.add('has-snoozed');
                 sound.pause();
                 sound.currentTime = 0;
 
-                // Zeit +5 Min
                 let [h, m] = alarmInput.value.split(':').map(Number);
                 m += 5;
                 if (m >= 60) { m -= 60; h = (h + 1) % 24; }
                 alarmInput.value = h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0');
-                localStorage.setItem('alarm_time', alarmInput.value);
+                setAlarm();
             }
         }
 
-        function testAlarm() { setTimeout(triggerAlarm, 5000); }
+        function stopAlarm() {
+            isAlarming = false;
+            alarmSet = false;
+            document.body.classList.remove('alarm-active');
+            document.body.classList.remove('has-snoozed');
+            sound.pause();
+            sound.currentTime = 0;
+            setBtn.innerText = "WECKER SCHARF SCHALTEN";
+            setBtn.classList.remove('active');
+        }
     </script>
 </body>
 </html>
